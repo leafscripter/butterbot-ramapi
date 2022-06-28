@@ -15,15 +15,15 @@ from ramapi import Base
 from ramapi import Character
 from ramapi import Episode
 
-# Import OS utilities
-from os import environ 
-from dotenv import load_dotenv 
+# Import variables from the config file 
+from json import loads 
+from pathlib import Path
 
-load_dotenv()
+config = loads(Path("config.json").read_text())
 
 # Setup the bot
 bot = commands.Bot(command_prefix=">")
-token = environ["TOKEN"]
+token = config["TOKEN"]
 
 api_characters  = ramapi.Character.get_all()
 api_episodes = ramapi.Episode.get_all()
