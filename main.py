@@ -15,9 +15,15 @@ from ramapi import Base
 from ramapi import Character
 from ramapi import Episode
 
+# Import OS utilities
+from os import environ 
+from dotenv import load_dotenv 
+
+load_dotenv()
+
 # Setup the bot
 bot = commands.Bot(command_prefix=">")
-token = 'OTg4MzU4ODU3NTg1NzIxNDA0.GpEuS4.w5L0Mavhh4d7J6g0eTpOXMfDbbkCtOB3Zs6wuY'
+token = environ["TOKEN"]
 
 api_characters  = ramapi.Character.get_all()
 api_episodes = ramapi.Episode.get_all()
