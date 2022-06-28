@@ -23,7 +23,7 @@ config = loads(Path("config.json").read_text())
 
 # Setup the bot
 bot = commands.Bot(command_prefix=">")
-token = config["TOKEN"]
+token = config["token"]
 
 api_characters  = ramapi.Character.get_all()
 api_episodes = ramapi.Episode.get_all()
