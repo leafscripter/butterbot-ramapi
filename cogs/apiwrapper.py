@@ -16,17 +16,34 @@ class APIWrapper(commands.Cog):
     def __init__(self, client):
         self.client = client 
 
-        self.characters = ramapi.Character.get_all()["results"]
-        self.episodes = ramapi.Episode.get_all()["results"]
-        self.locations =  ramapi.Location.get_all()["results"]
+        self.characters = ramapi.Character
+        self.episodes = ramapi.Episode
+        self.locations =  ramapi.Location
+
+        self.character_results = ramapi.Character.get_all()["results"]
+        self.episode_results = ramapi.Character.get_all()["results"]
+        self.location_results = ramapi.Character.get_all()["results"]
+        
+        self.embed_color = discord.Color.green()
 
     @commands.command(name="character")
     async def get_character_info(self, ctx, name = ""):
 
+        if not name: 
+            await ctx.send(embed=discord.Embed(
+                description="""
+                Sorry, but you didn't give me any names to search,
+
+                Use ?list characters
+                """,
+                color = self.embed_color
+            ))
+            return
+
         character : list
 
         # Check if the name matches any character names in the API
-        for result in (self.characters):
+        for result in (self.character_results):
             if name.lower() in result["name"].lower():
                 character = result
                 break
@@ -41,14 +58,27 @@ class APIWrapper(commands.Cog):
             Origin: {character["origin"]["name"]}
             """,
 
-            color=discord.Color.purple()
+            color= self.embed_color
         ).set_image(url=character["image"]))
 
     @commands.command(name="location") 
     async def get_location_info(self, ctx, name = ""):
+
+        if not name:
+            await ctx.send(embed=discord.Embed(
+                description = """
+                I can't search the database without knowing any names,
+
+                Use ?list locations
+                """,
+                color = self.embed_color
+            )) 
+
+            return
+
         location : list 
 
-        for result in (self.locations):
+        for result in (self.location_results):
             if name.lower() in result["name"].lower():
                 location = result 
                 break 
@@ -60,38 +90,99 @@ class APIWrapper(commands.Cog):
             ID: {location["id"]}
             Dimension: {location["dimension"]}
             """,
-            color = discord.Color.purple()
+            color = self.embed_color
         ))
 
     @commands.command(name="episode")
-    async def get_episode_info(self, ctx, name): 
+    async def get_episode_info(self, ctx, name = ""): 
         
+        if not name:
+            await ctx.send(embed=discord.Embed(
+                description = """
+                You're not giving me a whole lot to work with,
+
+                Use ?list episodes
+                """,
+                color = self.embed_color 
+            ))
+            return 
+
         episode : list 
 
-        for result in (self.episodes):
+        for result in (self.episode_results):
             if name.lower() in result["name"].lower():
                 episode = result 
-                break 
+                break
 
         await ctx.send(embed=discord.Embed(
             title=episode["name"],
             description= f"""
-
             Unfortunately,
-
-            The Rick and Morty API does not provide much information,
-
-            This was all that I could find :/
 
             Air date: {episode["air_date"]}
             Episode: {episode["episode"]}
             """,
-            color = discord.Color.purple()
+            color = self.embed_color
         ))
 
+
+    # Determine what the user is requesting 
+    # Try to index the class with the request argument 
+    # If results are found, list them all in an embed 
+    @commands.command(name="list")
+    async def list_requested_info(self, ctx, request = "", page = 1):
+
+        if not request or not getattr(self, request):
+            await ctx.send(embed=discord.Embed(
+                description = """
+                It appears that you do not know how to use this command,
+
+                Here is a quick tutorial:
+
+                **?list characters page**    this will list all the characters in the API
+                **?list episodes**      this will list all the episodes in the API
+                **?list locations**     this will list all the locations in the API
+                """,
+                
+                color = self.embed_color
+            ))
+            return 
+
+        if page > 42 or page < 1:
+            await ctx.send(embed=discord.Embed(
+                description = f"""
+                There are only 42 pages available, 
+
+                You attemped to index page {page} which does not exist.
+                """,
+                color = self.embed_color
+            ))
+
+        requested_list = ""
+        requested_info : list
+
+        count = 1
+        count_str = str(count) + ") "
+
+        if request == "characters":
+            requested_info = getattr(self, request).get_page(page)["results"]
+        else: 
+            requested_info = getattr(self, request).get_all()["results"]
+
+        for result in (requested_info):
+            requested_list += count_str + result["name"] 
+            requested_list += "\n"
+
+            count += 1
+            count_str = str(count) + ") "
+
+        print(requested_list)
+
+        await ctx.send(embed=discord.Embed(
+            title = f"List of {request}",
+            description = requested_list,
+            color = self.embed_color
+        ))
     
 def setup(client):
     client.add_cog(APIWrapper(client))
-        
-
-        

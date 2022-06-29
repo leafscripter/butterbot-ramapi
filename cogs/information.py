@@ -18,17 +18,18 @@ class Information(commands.Cog):
 
             Here is a list of commands to get you started:
 
-            >character name -> this command displays character information 
-            >episode name -> this command displays episode information 
-            >location name -> this command displays location information 
+            **?character name**       this command displays character information 
+            **?episode name**         this command displays episode information 
+            **?location name**        this command displays location information 
+            **?list name**            this command lists all the things you can search
 
-            >helpme -> use this command if you forget the commands
+            **?helpme**               use this command if you forget the commands
             
             Well that is all!
             
             """,
 
-            color = discord.Color.purple()
+            color = discord.Color.green()
             ) 
 
         await ctx.send(embed = info_embed)
