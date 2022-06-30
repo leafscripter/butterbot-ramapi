@@ -11,7 +11,7 @@ import os
 
 
 # Setup the bot
-client = commands.Bot(command_prefix=">")
+client = commands.Bot(command_prefix="?")
 config = loads(Path("config.json").read_text())
 token = config["token"]
 
