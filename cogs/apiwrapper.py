@@ -1,6 +1,11 @@
-# TODO: A command that displays information about the requested character 
-# TODO: A command that displays location info 
-# TODO: A command that displays episode info 
+# TODO: A command that displays information about the requested character (DONE)
+# TODO: A command that displays location info (DONE)
+# TODO: A command that displays episode info (DONE)
+# TODO: Make the code cleaner
+
+
+import requests
+import json
 
 import discord
 from discord.ext import commands  
@@ -21,8 +26,11 @@ class APIWrapper(commands.Cog):
         self.locations =  ramapi.Location
 
         self.character_results = ramapi.Character.get_all()["results"]
-        self.episode_results = ramapi.Character.get_all()["results"]
-        self.location_results = ramapi.Character.get_all()["results"]
+        self.episode_results = ramapi.Episode.get_all()["results"]
+        self.location_results = ramapi.Location.get_all()["results"]
+
+        # self.location 
+        self.episode = []
         
         self.embed_color = discord.Color.green()
 
@@ -95,7 +103,7 @@ class APIWrapper(commands.Cog):
 
     @commands.command(name="episode")
     async def get_episode_info(self, ctx, name = ""): 
-        
+
         if not name:
             await ctx.send(embed=discord.Embed(
                 description = """
@@ -107,20 +115,31 @@ class APIWrapper(commands.Cog):
             ))
             return 
 
-        episode : list 
-
         for result in (self.episode_results):
             if name.lower() in result["name"].lower():
-                episode = result 
+                self.episode = result
                 break
+        
+        characters_in_episode = []
+        character_description = ""
+
+        for character in (self.episode["characters"]): 
+            response = requests.get(character)
+            response_json = response.json()
+            characters_in_episode.append(response_json["name"])
+
+        for character in (characters_in_episode):
+            character_description += character + ", "
 
         await ctx.send(embed=discord.Embed(
-            title=episode["name"],
+            title= self.episode["name"],
             description= f"""
-            Unfortunately,
 
-            Air date: {episode["air_date"]}
-            Episode: {episode["episode"]}
+            Air date: {self.episode["air_date"]}
+
+            Episode: {self.episode["episode"]}
+
+            Characters: {character_description}
             """,
             color = self.embed_color
         ))
@@ -175,8 +194,6 @@ class APIWrapper(commands.Cog):
 
             count += 1
             count_str = str(count) + ") "
-
-        print(requested_list)
 
         await ctx.send(embed=discord.Embed(
             title = f"List of {request}",
