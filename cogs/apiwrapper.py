@@ -4,8 +4,12 @@
 # TODO: Make the code cleaner
 
 
+from threading import Thread
 import requests
 import json
+import concurrent
+
+from concurrent.futures import ThreadPoolExecutor
 
 import discord
 from discord.ext import commands  
@@ -15,6 +19,28 @@ from ramapi import Base
 from ramapi import Character  
 from ramapi import Episode 
 from ramapi import Location 
+
+# class Helper(): 
+
+#     def __init__(self, threads):
+#         self.threads = threads 
+#         self.results = []
+
+#     def execute(self, callback, args = None):
+
+#         with ThreadPoolExecutor(max_workers=self.threads) as executor:
+
+#             future_to_url = {executor.submit(callback, args)
+            
+#             for x in list}
+
+#             for future in concurrent.futures.as_completed(future_to_url):
+#                 try:
+#                     data = future.result()
+#                     self.results.append(data)
+#                 except Exception as err:
+
+#                     print("ERROR:", err)
 
 class APIWrapper(commands.Cog):
 
@@ -28,6 +54,9 @@ class APIWrapper(commands.Cog):
         self.character_results = ramapi.Character.get_all()["results"]
         self.episode_results = ramapi.Episode.get_all()["results"]
         self.location_results = ramapi.Location.get_all()["results"]
+
+        self.session = requests.Session()
+        # self.helper = Helper(20)
 
         # self.location 
         self.episode = []
@@ -101,6 +130,8 @@ class APIWrapper(commands.Cog):
             color = self.embed_color
         ))
 
+
+
     @commands.command(name="episode")
     async def get_episode_info(self, ctx, name = ""): 
 
@@ -123,8 +154,9 @@ class APIWrapper(commands.Cog):
         characters_in_episode = []
         character_description = ""
 
+        # TODO: Implement a more effective method (DONE)
         for character in (self.episode["characters"]): 
-            response = requests.get(character)
+            response = self.session.get(character)
             response_json = response.json()
             characters_in_episode.append(response_json["name"])
 
@@ -143,7 +175,6 @@ class APIWrapper(commands.Cog):
             """,
             color = self.embed_color
         ))
-
 
     # Determine what the user is requesting 
     # Try to index the class with the request argument 
