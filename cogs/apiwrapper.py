@@ -7,9 +7,9 @@
 from threading import Thread
 import requests
 import json
-import concurrent
+# import concurrent
 
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
 
 import discord
 from discord.ext import commands  
